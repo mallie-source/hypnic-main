@@ -417,10 +417,52 @@
     }
 
     /* Responsive */
+    /* Hamburger */
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      cursor: pointer; padding: 4px; background: none; border: none;
+    }
+    .hamburger span {
+      display: block; width: 24px; height: 1.5px; background: var(--white);
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+    .mobile-menu {
+      position: fixed; inset: 0;
+      background: rgba(8,9,9,0.97); backdrop-filter: blur(24px);
+      z-index: 490; flex-direction: column; align-items: center;
+      justify-content: center; gap: 6px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.35s;
+    }
+    .mobile-menu.active { opacity: 1; pointer-events: all; }
+    .mobile-menu a {
+      font-family: var(--font-display);
+      font-size: clamp(40px, 12vw, 64px);
+      font-weight: 300; color: var(--white);
+      text-decoration: none; letter-spacing: 0.01em;
+      transition: color 0.2s;
+    }
+    .mobile-menu a:active { color: var(--accent); }
+    .mobile-menu-divider { width: 40px; height: 1px; background: var(--border); margin: 10px 0; }
+    .mobile-cta-btn {
+      font-family: var(--font-ui); font-size: 12px; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--black) !important; background: var(--accent);
+      padding: 16px 44px; border-radius: 2px; margin-top: 20px;
+    }
+
     @media (max-width: 900px) {
+      .cursor, .cursor-ring { display: none; }
+      body { cursor: auto; }
       nav { padding: 22px 24px; }
       nav.scrolled { padding: 15px 24px; }
       .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .mobile-menu { display: flex; }
       .hero { padding: 100px 24px 80px; }
       .arms { padding: 80px 24px; }
       .arms-grid { grid-template-columns: 1fr; }
@@ -449,7 +491,20 @@
       <li><a href="#arms">Our Divisions</a></li>
       <li><a href="#contact" class="nav-cta">Get in Touch</a></li>
     </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#about" class="mobile-link">About</a>
+    <div class="mobile-menu-divider"></div>
+    <a href="#arms" class="mobile-link">Our Divisions</a>
+    <div class="mobile-menu-divider"></div>
+    <a href="#contact" class="mobile-link">Contact</a>
+    <a href="#contact" class="mobile-link mobile-cta-btn">Get in Touch</a>
+  </div>
 
   <!-- Hero -->
   <section class="hero">
@@ -619,6 +674,29 @@
       });
     }, { threshold: 0.1 });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Touch tracking for cursor ring on mobile
+    document.addEventListener('touchmove', e => {
+      const t = e.touches[0];
+      mx = t.clientX; my = t.clientY;
+      cursor.style.left = mx + 'px';
+      cursor.style.top = my + 'px';
+    }, { passive: true });
+
+    // Hamburger menu
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileMenu.classList.toggle('active');
+    });
+    // Close menu on mobile link tap
+    document.querySelectorAll('.mobile-link').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        mobileMenu.classList.remove('active');
+      });
+    });
 
     // Smooth anchor
     document.querySelectorAll('a[href^="#"]').forEach(a => {
